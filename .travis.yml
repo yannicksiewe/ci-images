@@ -1,0 +1,63 @@
+language: generic
+
+cache: false
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+
+env:
+  matrix:
+    - DOCKER_IMAGE=ysie/helm        DIR=helm/2.14    TAG=2.14      SQUASH=true  ALIASES="latest"
+
+install:
+  - |
+    if [ ! -z ${SQUASH+x} ]; then
+      sudo -H pip install docker-squash
+    fi
+  - curl -sL https://github.com/gdraheim/docker-copyedit/archive/v1.2.2036.tar.gz | tar xzf -  --wildcards --strip-components=1 */docker-copyedit.py
+
+before_script:
+  - export TAG="${TAG:-latest}"
+  - docker --version
+  - docker info
+
+script:
+  - set -e
+  - cd "${DIR}"
+  - travis_retry docker build --pull -t "${DOCKER_IMAGE}:${TAG}" .
+  - |
+    if [ ! -z ${SQUASH+x} ]; then
+      docker-squash -t "${DOCKER_IMAGE}:squashed" "${DOCKER_IMAGE}:${TAG}"
+      docker tag "${DOCKER_IMAGE}:squashed" "${DOCKER_IMAGE}:${TAG}"
+    fi
+  - bash -xe "tests.sh"
+  - find . -name '*.sh' -print0 | xargs -0 shellcheck
+  - grep -lr '#!/bin/sh' . | xargs --no-run-if-empty shellcheck
+  - set +e
+
+before_deploy:
+  - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USER}" --password-stdin
+
+after_script:
+  - docker images
+  - docker history "${DOCKER_IMAGE}:${TAG}"
+
+deploy:
+  provider: script
+  script: bash docker_push
+  skip_cleanup: true
+  on:
+    repo: https://gitlab.com/yannicksiewe/ci-images
+    all_branches: true
+    condition: $TRAVIS_BRANCH == master || $TRAVIS_TAG =~ ^[0-9]+.[0-9]+.+$
+
+notifications:
+  email:
+    recipients:
+      - ysi@adorsys.de
+    on_success: never
+    on_failure: always

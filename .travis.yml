@@ -44,7 +44,7 @@ after_script:
 
 deploy:
   provider: script
-  script: bash docker_push
+  script: travis-deploy.sh
   skip_cleanup: true
   on:
     repo: yannicksiewe/ci-images

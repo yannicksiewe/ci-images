@@ -34,10 +34,6 @@ script:
       docker-squash -t "${DOCKER_IMAGE}:squashed" "${DOCKER_IMAGE}:${TAG}"
       docker tag "${DOCKER_IMAGE}:squashed" "${DOCKER_IMAGE}:${TAG}"
     fi
-  - bash -xe "tests.sh"
-  - find . -name '*.sh' -print0 | xargs -0 shellcheck
-  - grep -lr '#!/bin/sh' . | xargs --no-run-if-empty shellcheck
-  - set +e
 
 before_deploy:
   - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USER}" --password-stdin
@@ -58,6 +54,6 @@ deploy:
 notifications:
   email:
     recipients:
-      - ysi@adorsys.de
+      - yannick.siewe@gmail.com
     on_success: never
     on_failure: always

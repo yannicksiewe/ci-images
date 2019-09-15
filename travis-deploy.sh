@@ -22,7 +22,6 @@ travis_retry() {
   return "${result}"
 }
 
-
 echo "push to ${DOCKER_IMAGE}:${TAG}"
 travis_retry docker push "${DOCKER_IMAGE}:${TAG}"
 

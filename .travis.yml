@@ -44,7 +44,7 @@ after_script:
 
 deploy:
   provider: script
-  script: travis-deploy.sh
+  script: "$TRAVIS_BUILD_DIR/travis-deploy.sh"
   skip_cleanup: true
   on:
     repo: yannicksiewe/ci-images

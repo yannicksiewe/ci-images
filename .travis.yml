@@ -47,7 +47,7 @@ deploy:
   script: bash docker_push
   skip_cleanup: true
   on:
-    repo: https://gitlab.com/yannicksiewe/ci-images
+    repo: yannicksiewe/ci-images
     all_branches: true
     condition: $TRAVIS_BRANCH == master || $TRAVIS_TAG =~ ^[0-9]+.[0-9]+.+$
 
